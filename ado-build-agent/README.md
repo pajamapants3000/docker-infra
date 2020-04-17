@@ -17,12 +17,13 @@ Use Dockerfile.linux (e.g. rename to Dockerfile)
 
 Let <Dockerfile> be the name of the desired Dockerfile (e.g. either Dockerfile.linux or Dockerfile.win)
 
-1. In cmd or powershell, in this directory, run: `docker build -f <Dockerfile> -t dockeragent:latest .`
+1. In cmd or powershell, in this directory, run: `docker build -f <Dockerfile> -t ado_build_agent:latest .`
   * this will build the container, named `dockeragent` with an explicit `latest` tag
-  * change name and/or tag as needed
+  * change name and/or tag as needed (instead of "latest", should be e.g. "linux-dotnet-docker-compose-1")
 2. Run the following command to bring up the containerized build agent:
-`docker run -e AZP_URL=<Azure DevOps instance> -e AZP_TOKEN=<PAT token> -e AZP_AGENT_NAME=mydockeragent dockeragent:latest`
+`docker run -e AZP_URL=<Azure DevOps instance> -e AZP_TOKEN=<PAT token> -e AZP_AGENT_NAME=mydockeragent ado_build_agent:latest`
   * replace "mydockeragent", "dockeragent", and "latest" as appropriate
+  * change name and/or tag as needed (instead of "latest", should be e.g. "linux-dotnet-docker-compose-1")
   * alternatively, use either the run-linux-agent.ps1 or run-win-agent.ps1
 
 See https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/docker?view=azure-devops#windows for more details.

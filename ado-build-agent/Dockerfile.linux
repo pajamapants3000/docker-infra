@@ -1,7 +1,5 @@
-FROM ubuntu:16.04
+FROM ubuntu:19.10 AS base
 
-# To make it easier for build and release pipelines to run apt-get,
-# configure apt to not require confirmation (assume the -y argument by default)
 ENV DEBIAN_FRONTEND=noninteractive
 RUN echo "APT::Get::Assume-Yes \"true\";" > /etc/apt/apt.conf.d/90assumeyes
 
@@ -12,8 +10,8 @@ RUN apt-get update \
         jq \
         git \
         iputils-ping \
-        libcurl3 \
-        libicu55 \
+        libcurl4 \
+        libicu63 \
         libunwind8 \
         netcat
 
@@ -23,3 +21,57 @@ COPY ./start.sh .
 RUN chmod +x start.sh
 
 CMD ["./start.sh"]
+
+FROM base AS dotnet
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        apt-transport-https \
+        gpg \
+        libgdiplus \
+        libkrb5-3 \
+        liblttng-ust0 \
+        libssl1.1 \
+        wget \
+        zlib1g
+
+RUN wget -O- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o microsoft.asc.gpg \
+    && mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/ \
+    && wget https://packages.microsoft.com/config/ubuntu/19.04/prod.list \
+    && mv prod.list /etc/apt/sources.list.d/microsoft-prod.list \
+    && chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg \
+    && chown root:root /etc/apt/sources.list.d/microsoft-prod.list
+
+RUN apt-get update
+RUN apt-get install dotnet-sdk-3.1
+
+FROM base AS docker
+RUN curl -fsSL https://get.docker.com | bash -s
+
+FROM docker AS docker-compose
+RUN curl -L \
+    https://github.com/docker/compose/releases/download/1.25.4/docker-compose-`uname -s`-`uname -m` \
+        > /usr/local/bin/docker-compose \
+    && chmod +x /usr/local/bin/docker-compose
+
+FROM docker-compose AS dotnet-docker-compose
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        apt-transport-https \
+        gpg \
+        libgdiplus \
+        libkrb5-3 \
+        liblttng-ust0 \
+        libssl1.1 \
+        wget \
+        zlib1g
+
+RUN wget -O- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o microsoft.asc.gpg \
+    && mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/ \
+    && wget https://packages.microsoft.com/config/ubuntu/19.04/prod.list \
+    && mv prod.list /etc/apt/sources.list.d/microsoft-prod.list \
+    && chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg \
+    && chown root:root /etc/apt/sources.list.d/microsoft-prod.list
+
+RUN apt-get update
+RUN apt-get install dotnet-sdk-3.1
+
