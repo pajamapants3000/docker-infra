@@ -1,0 +1,22 @@
+version: '3.7'
+
+services:
+    teamcity:
+        image: jetbrains/teamcity-server:2019.2.2
+        volumes:
+            - teamcity-server-datadir:/data/teamcity_server/datadir
+            - teamcity-server-logs:/opt/teamcity/logs
+        ports:
+            - 8111:8111
+    teamcity-agent:
+        image: pajamapants3000/teamcity-agent-with-compose:2019.2.2
+        build: ./agent
+        environment:
+            SERVER_URL: http://teamcity:8111
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+    teamcity-server-datadir:
+    teamcity-server-logs:
+
