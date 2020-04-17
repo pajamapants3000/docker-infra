@@ -1,5 +1,13 @@
 # Azure DevOps Server Build Agent
 
+## Docker Registry
+Add the following line to your hosts file (C:\Windows\System32\drivers\etc\hosts)
+  * `my-registry 127.0.0.1`
+Alternatively, change the CONTAINER_REGISTRY environment variable passed to
+run-X-agent.ps1 to point to whatever registry you want (e.g. your
+DockerHub registry)
+TODO: make this a parameter you can pass to the run script
+
 ## Windows
 Use Dockerfile.win (e.g. rename to Dockerfile)
 
