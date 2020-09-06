@@ -10,4 +10,5 @@ docker run -d `
     -e AGENT_VOLUME_DIR=${AGENT_VOLUME_DIR} `
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock `
     --mount type=volume,source=${AGENT_VOLUME_NAME},target=${AGENT_VOLUME_DIR} `
+    --name ado_build_agent `
     my-registry:55000/ado_build_agent:linux-dotnet-docker-compose-1
