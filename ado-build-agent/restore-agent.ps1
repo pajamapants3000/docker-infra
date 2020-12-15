@@ -1,24 +1,18 @@
 param (
-    [string]$HostOs = "Linux",  # Currently supports "Linux" (default) or "Windows"
-    [string]$Pat                # Personal Access Token
+    [string]$HostOs = "Linux",                              # Currently supports "Linux" (default) or "Windows"
+    [Parameter(Mandatory=$true)][string]$Pat                # Personal Access Token
 )
 
 # TODO: Make a proper CMDlet
+# TODO: Currently only works for Linux - Docker socket bind mount paths not compatible with Windows filesystem
 
 # Define Constants #
 $AGENT_VOLUME_NAME = "ado_build_agent"
-$DOCKER_HOST = "tcp://0.0.0.0:2375"
 
-## Windows Agent ##
-$AZP_AGENT_NAME_WIN = "docker-win-1"
-$AGENT_CONTAINER_NAME_WIN = "ado_build_agent-win"
-$AGENT_BUILD_TAG_WIN = "win-dotnet-docker-compose-1"
-$DOCKERFILE_WIN = "Dockerfile.win"
-$MY_REGISTRY_HOST_WIN = ""
-$MY_REGISTRY_PORT_WIN = ""
-$ADDITIONAL_DOCKER_RUN_ARGUMENTS_WIN = "DOCKER_HOST=tcp://0.0.0.0:2375"
-$DIR_ROOT_WIN = "C:/Volumes/"
-## End Windows Agent ##
+# TODO: So far none of these worked in a Linux container. Have to use bind-mount, which I can't get working in Windows. Eesh.
+#$DOCKER_HOST = "tcp://0.0.0.0:2375"
+#$DOCKER_HOST = "tcp://host.docker.internal:2375"
+#$DOCKER_HOST = "npipe:////./pipe/docker_engine"
 
 ## Linux Agent ##
 $AZP_AGENT_NAME_LINUX = "docker-linux-1"
@@ -27,11 +21,18 @@ $AGENT_BUILD_TAG_LINUX = "linux-dotnet-docker-compose-1"
 $DOCKERFILE_LINUX = "Dockerfile.linux"
 $MY_REGISTRY_HOST_LINUX = "my-registry"
 $MY_REGISTRY_PORT_LINUX = "55000"
-$ADDITIONAL_DOCKER_RUN_ARGUMENTS_LINUX = `
-    "--mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock"
 $DIR_ROOT_LINUX = "/"
-## End Windows Agent ##
+## End Linux Agent ##
 
+## Windows Agent ##
+$AZP_AGENT_NAME_WIN = "docker-win-1"
+$AGENT_CONTAINER_NAME_WIN = "ado_build_agent-win"
+$AGENT_BUILD_TAG_WIN = "win-dotnet-docker-compose-1"
+$DOCKERFILE_WIN = "Dockerfile.win"
+$MY_REGISTRY_HOST_WIN = ""
+$MY_REGISTRY_PORT_WIN = ""
+$DIR_ROOT_WIN = "C:/Volumes/"
+## End Windows Agent ##
 # End Define Constants #
 
 # Set HostOs-specific values
@@ -43,7 +44,6 @@ if ($HostOs -eq "Linux") {
 
     $MY_REGISTRY_HOST = $MY_REGISTRY_HOST_LINUX
     $MY_REGISTRY_PORT = $MY_REGISTRY_PORT_LINUX
-    $ADDITIONAL_DOCKER_RUN_ARGUMENTS = $ADDITIONAL_DOCKER_RUN_ARGUMENTS_LINUX
     $DIR_ROOT = $DIR_ROOT_LINUX
 }
 elseif ($HostOs -eq "Windows") {
@@ -54,7 +54,6 @@ elseif ($HostOs -eq "Windows") {
 
     $MY_REGISTRY_HOST = $MY_REGISTRY_HOST_WIN
     $MY_REGISTRY_PORT = $MY_REGISTRY_PORT_WIN
-    $ADDITIONAL_DOCKER_RUN_ARGUMENTS = $ADDITIONAL_DOCKER_RUN_ARGUMENTS_WIN
     $DIR_ROOT = $DIR_ROOT_WIN
 }
 else
@@ -106,8 +105,8 @@ docker run -d `
     -e CONTAINER_REGISTRY="${MY_REGISTRY_HOST}:${MY_REGISTRY_PORT}" `
     -e AGENT_VOLUME_NAME=${AGENT_VOLUME_NAME} `
     -e AGENT_VOLUME_DIR=${AGENT_VOLUME_DIR} `
-    -e DOCKER_HOST=$DOCKER_HOST `
     --mount type=volume,source=${AGENT_VOLUME_NAME},target=${AGENT_VOLUME_DIR} `
+    --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock `
     --name ${AGENT_CONTAINER_NAME} `
     ${AgentImageTag}
 
