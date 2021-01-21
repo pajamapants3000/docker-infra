@@ -1,19 +1,36 @@
-# Azure DevOps Server Build Agent
+# Azure DevOps Server Build Agent #
 
-## Docker Registry
+## Docker Registry ##
 Add the following line to your hosts file (C:\Windows\System32\drivers\etc\hosts)
   * `my-registry 127.0.0.1`
 Alternatively, change the CONTAINER_REGISTRY environment variable passed to
 run-X-agent.ps1 to point to whatever registry you want (e.g. your
 DockerHub registry)
 TODO: make this a parameter you can pass to the run script
+##
 
-## Windows
-Use Dockerfile.win (e.g. rename to Dockerfile)
-
+## Windows ##
+Use Dockerfile.win
+##
 
 ## Linux
-Use Dockerfile.linux (e.g. rename to Dockerfile)
+Use Dockerfile.linux
+
+Note: May occasionally need to update Ubuntu base image version. When this
+happens, may also need to update package versions.
+
+IMPORTANT: start.sh must use unix line endings ('fileformat'=unix in vim)
+##
+
+## Short Instructions ##
+$> .\restore-agent.ps1 [-HostOs [Linux|Windows]] -Pat <PAT>
+
+Note that -HostOs is optional - defaults to Linux
+
+This will build and push the image to the local registry, then start the container.
+## End Short Instructions ##
+
+## Long Instructions ##
 
 Let <Dockerfile> be the name of the desired Dockerfile (e.g. either Dockerfile.linux or Dockerfile.win)
 
@@ -24,7 +41,6 @@ Let <Dockerfile> be the name of the desired Dockerfile (e.g. either Dockerfile.l
 `docker run -e AZP_URL=<Azure DevOps instance> -e AZP_TOKEN=<PAT token> -e AZP_AGENT_NAME=mydockeragent ado_build_agent:latest`
   * replace "mydockeragent", "dockeragent", and "latest" as appropriate
   * change name and/or tag as needed (instead of "latest", should be e.g. "linux-dotnet-docker-compose-1")
-  * alternatively, use either the run-linux-agent.ps1 or run-win-agent.ps1
 
 See https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/docker?view=azure-devops#windows for more details.
 
@@ -51,4 +67,5 @@ See https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/docker?view=a
     <td>Work directory (default value: _work)</td>
   </tr>
 </table>
+## End Long Instructions ##
 

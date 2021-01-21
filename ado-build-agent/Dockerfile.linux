@@ -1,4 +1,4 @@
-FROM ubuntu:19.10 AS base
+FROM ubuntu:20.04 AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN echo "APT::Get::Assume-Yes \"true\";" > /etc/apt/apt.conf.d/90assumeyes
@@ -11,7 +11,7 @@ RUN apt-get update \
         git \
         iputils-ping \
         libcurl4 \
-        libicu63 \
+        libicu66 \
         libunwind8 \
         netcat
 
@@ -33,16 +33,6 @@ RUN apt-get update \
         libssl1.1 \
         wget \
         zlib1g
-
-RUN wget -O- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o microsoft.asc.gpg \
-    && mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/ \
-    && wget https://packages.microsoft.com/config/ubuntu/19.04/prod.list \
-    && mv prod.list /etc/apt/sources.list.d/microsoft-prod.list \
-    && chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg \
-    && chown root:root /etc/apt/sources.list.d/microsoft-prod.list
-
-RUN apt-get update
-RUN apt-get install dotnet-sdk-3.1
 
 FROM base AS docker
 RUN curl -fsSL https://get.docker.com | bash -s
@@ -67,11 +57,11 @@ RUN apt-get update \
 
 RUN wget -O- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o microsoft.asc.gpg \
     && mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/ \
-    && wget https://packages.microsoft.com/config/ubuntu/19.04/prod.list \
+    && wget https://packages.microsoft.com/config/ubuntu/20.04/prod.list \
     && mv prod.list /etc/apt/sources.list.d/microsoft-prod.list \
     && chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg \
     && chown root:root /etc/apt/sources.list.d/microsoft-prod.list
 
 RUN apt-get update
-RUN apt-get install dotnet-sdk-3.1
+RUN apt-get install dotnet-sdk-5.0
 
