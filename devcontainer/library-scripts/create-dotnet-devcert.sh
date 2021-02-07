@@ -1,8 +1,4 @@
-#!/bin/env bash
-
-# Adapted from https://github.com/BorisWilhelms/create-dotnet-devcert
-# see also my fork at https://github.com/pajamapants3000/create-dotnet-devcert, intended for installing a versatile dev cert on the host (not in an isolated dev container)
-# Script is tailored to Ubuntu/Debian - may need modifications for other distros
+#!/bin/bash
 
 # May want to make these customizable
 CERT_PW=""
@@ -39,8 +35,8 @@ distinguished_name      = subject
 req_extensions          = req_ext
 x509_extensions         = x509_ext
 
-[ subject ]
-commonName              = localhost
+[subject]
+commonName              = clutter-noteservice
 
 [req_ext]
 basicConstraints        = critical, CA:true
@@ -54,7 +50,8 @@ subjectAltName          = critical, @alt_names
 1.3.6.1.4.1.311.84.1.1  = ASN1:UTF8String:ASP.NET Core HTTPS development certificate # Needed to get it imported by dotnet dev-certs
 
 [alt_names]
-DNS.1                   = localhost
+DNS.1                   = clutter-noteservice
+DNS.2                   = localhost
 EOF
 
 function configure_nssdb() {
@@ -72,16 +69,16 @@ for NSSDB in ${NSSDB_PATHS[@]}; do
     fi
 done
 
-# Install public certificate to environment
-rm -f /etc/ssl/certs/$DEVCERT_NAME.pem
-cp $TMP_PATH/$CRTFILE "/usr/local/share/ca-certificates"
+echo Installing public certificate to environment
+rm -vf /etc/ssl/certs/$DEVCERT_NAME.pem
+cp -v $TMP_PATH/$CRTFILE "/usr/local/share/ca-certificates"
 update-ca-certificates
 
-# Install public and private keys for dotnet and preserve for reference and reuse
+echo Installing public and private keys for dotnet and preserve for reference and reuse
 dotnet dev-certs https --clean --import $TMP_PATH/$PFXFILE -p "$CERT_PW"
 cp -v $TMP_PATH/$PFXFILE $TMP_PATH/$CRTFILE $DEVCERT_PATH/
 chmod -vR 644 $DEVCERT_PATH/*
-rm -R $TMP_PATH
+rm -vR $TMP_PATH
 
 echo "Dev cert path: $DEVCERT_PATH/$PFXFILE"
 echo "Dev cert password: \"$CERT_PW\""

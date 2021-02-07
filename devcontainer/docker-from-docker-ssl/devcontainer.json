@@ -1,0 +1,29 @@
+{
+    "name": "Docker from Docker with unique dev-cert",
+    "dockerFile": "Dockerfile",
+    "runArgs": ["--init"],
+    "mounts": [
+        "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind",
+        // May want to bind something to make public certs available to host
+        // "source=${localEnv:HOME}/.aspnet/https/public,target=/aspnet/https/public,type=bind",
+    ],
+    "overrideCommand": false,
+
+    "remoteUser": "vscode",
+    "remoteEnv": {
+        "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_KESTREL__CERTIFICATES__DEFAULT__PATH": "/aspnet/https/dotnet-devcert.pfx",
+    },
+
+    "settings": { 
+        "terminal.integrated.shell.linux": "/bin/bash"
+    },
+
+    "extensions": [
+        "ms-azuretools.vscode-docker",
+        "ms-dotnettools.csharp"
+    ],
+
+    "postCreateCommand": "./.devcontainer/common-postcreate.sh"
+}
